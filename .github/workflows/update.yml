@@ -2,7 +2,7 @@ name: 台股飆股雷達每日更新
 
 on:
   schedule:
-    - cron: '40 10 * * 1-5'
+    - cron: '30 6 * * 1-5'
   workflow_dispatch:
 
 permissions:
