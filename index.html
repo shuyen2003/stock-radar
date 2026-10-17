@@ -4,11 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>台股飆股雷達</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6fa;color:#17263a;font-family:-apple-system,BlinkMacSystemFont,sans-serif}header{background:#12345a;color:white;padding:24px 18px}h1{margin:0;font-size:27px}header p{margin:8px 0 0;color:#d6e6f4}main{padding:16px;max-width:760px;margin:auto}.panel{background:white;padding:18px;margin-bottom:15px;border-radius:15px;box-shadow:0 2px 8px #0001}h2{font-size:19px;margin:0 0 16px}.field{margin:14px 0}label{display:block;font-weight:600;margin-bottom:7px}input[type=number],select{width:100%;padding:11px;border:1px solid #bdcad9;border-radius:9px;font-size:16px}input[type=checkbox]{width:18px;height:18px;vertical-align:middle;margin-right:8px}.check{font-weight:400;padding:5px 0}button{background:#1267bd;color:white;border:0;padding:13px;border-radius:10px;font-size:16px;font-weight:700;width:100%;margin-top:12px}.note{color:#657386;font-size:13px;line-height:1.6}.status{padding:13px;background:#edf4fb;border-radius:9px;line-height:1.6}table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:10px 5px;border-bottom:1px solid #e4e9ef;text-align:left}th{background:#f2f6fa}.pill{background:#dfeefa;color:#16538b;border-radius:7px;padding:4px}.empty{padding:22px 0;color:#6b7888;text-align:center}
+</style>
 </head>
-<body style="font-family:sans-serif;padding:24px">
-<h1>📈 台股飆股雷達</h1>
-<h2>網頁啟動成功！</h2>
-<p>上市、上櫃股票智慧篩選系統</p>
-<p>下一步：安裝完整選股功能</p>
+<body>
+<header><h1>📈 台股飆股雷達</h1><p>上市＋上櫃｜起漲候選股智慧篩選</p></header>
+<main>
+<section class="panel"><h2>📅 股市資料狀態</h2><div id="status" class="status">尚未接上每日自動更新資料</div><p class="note">只使用已發布的真實資料；沒有資料時不產生假排名。GitHub Pages 本身不會自動抓取股票行情。</p></section>
+<section class="panel"><h2>⚙️ 自訂選股條件</h2>
+<div class="field"><label>成交量放大倍數</label><input id="volume" type="number" min="1" max="20" step="0.1" value="1.8"></div>
+<div class="field"><label>突破整理區間天數</label><select id="days"><option value="10">10 日</option><option value="20" selected>20 日</option><option value="60">60 日</option></select></div>
+<div class="field"><label>營收年增率最低（%）</label><input id="yoy" type="number" value="20"></div>
+<div class="field"><label>營收月增率最低（%）</label><input id="mom" type="number" value="0"></div>
+<div class="field"><label>三大法人連續買超天數</label><input id="inst" type="number" min="0" max="30" value="3"></div>
+<div class="field"><label>最低綜合評分</label><input id="score" type="number" min="0" max="100" value="70"></div>
+<label class="check"><input id="breakout" type="checkbox" checked>突破整理區間</label>
+<label class="check"><input id="near" type="checkbox" checked>接近起漲點</label>
+<label class="check"><input id="margin" type="checkbox">融資餘額未急增</label>
+<button onclick="screenStocks()">🔎 開始篩選</button>
+<button onclick="saveOptions()" style="background:#516982">儲存選股條件</button>
+</section>
+<section class="panel"><h2>🏆 飆股候選名單（最多20檔）</h2><div id="results" class="empty">等待載入真實股票資料</div></section>
+<section class="panel"><h2>🔔 候選股警示</h2><div id="alerts" class="note">尚無可確認的候選警示；此版本不會發送背景推播。</div></section>
+<section class="panel"><h2>🇺🇸 美股 AI／半導體觀察</h2><p>NVDA、AMD、AVGO、MU、TSM、LRCX、AMAT</p><p class="note">目前僅提供觀察清單，尚未連接美股市場資料。</p></section>
+</main>
+<script>
+const keys=['volume','days','yoy','mom','inst','score','breakout','near','margin'];
+try{let saved=JSON.parse(localStorage.getItem('radar_options')||'{}');for(let k of keys)if(saved[k]!==undefined){let e=document.getElementById(k);if(e.type==='checkbox')e.checked=saved[k];else e.value=saved[k]}}catch(e){}
+function saveOptions(){let v={};keys.forEach(k=>{let e=document.getElementById(k);v[k]=e.type==='checkbox'?e.checked:e.value});localStorage.setItem('radar_options',JSON.stringify(v));alert('選股條件已儲存在這台手機的瀏覽器')}
+let stocks=[];
+async function loadData(){try{let response=await fetch('./data/stocks.json?v='+Date.now());if(!response.ok)throw Error('尚無資料檔');let d=await response.json();if(!Array.isArray(d.stocks)||!d.date)throw Error('資料格式不正確');stocks=d.stocks;document.getElementById('status').textContent='資料日期：'+d.date+'｜股票筆數：'+stocks.length+'｜請確認各欄位資料完整度';screenStocks()}catch(e){document.getElementById('status').textContent='尚未連接自動更新資料（'+e.message+'）';document.getElementById('results').textContent='目前沒有可供篩選的真實股票資料'}}
+function screenStocks(){let n=k=>Number(document.getElementById(k).value),c=k=>document.getElementById(k).checked;let need=['code','name','volume_ratio','revenue_yoy','revenue_mom','institution_days','score','breakout_days','near_start','margin_ok'];let rows=stocks.filter(s=>need.every(k=>s[k]!==undefined&&s[k]!==null&&s[k]!=='')&&Number(s.volume_ratio)>=n('volume')&&Number(s.revenue_yoy)>=n('yoy')&&Number(s.revenue_mom)>=n('mom')&&Number(s.institution_days)>=n('inst')&&Number(s.score)>=n('score')&&(!c('breakout')||Number(s.breakout_days)>=n('days'))&&(!c('near')||s.near_start===true)&&(!c('margin')||s.margin_ok===true)).sort((a,b)=>Number(b.score)-Number(a.score)).slice(0,20);let el=document.getElementById('results');if(!rows.length){el.innerHTML='<div class="empty">沒有符合條件的股票，或尚未取得完整資料</div>';document.getElementById('alerts').textContent='尚無符合條件的警示';return}el.innerHTML='<table><thead><tr><th>代碼／名稱</th><th>量比</th><th>營收年增</th><th>分數</th></tr></thead><tbody>'+rows.map(s=>'<tr><td>'+String(s.code).replace(/[&<>"]/g,'')+'<br>'+String(s.name).replace(/[&<>"]/g,'')+'</td><td>'+Number(s.volume_ratio).toFixed(1)+'</td><td>'+Number(s.revenue_yoy).toFixed(1)+'%</td><td><span class="pill">'+Number(s.score)+'</span></td></tr>').join('')+'</tbody></table>';document.getElementById('alerts').textContent='目前符合條件：'+rows.length+' 檔（僅頁面內提示，非即時推播）'}
+loadData();
+</script>
 </body>
 </html>
