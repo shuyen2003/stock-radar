@@ -1,25 +1,51 @@
-name: 台股飆股雷達 V2 資料測試
+
+name: 台股飆股雷達 V2 每日更新測試
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '30 6 * * 1-5'
   push:
     branches:
       - radar-v2-test
+    paths:
+      - '.github/workflows/test-v2.yml'
+      - 'update.py'
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: radar-v2-test-update
+  cancel-in-progress: false
 
 jobs:
-  test:
+  update:
     runs-on: ubuntu-latest
+
     steps:
       - name: 取得測試分支程式
         uses: actions/checkout@v4
+        with:
+          ref: radar-v2-test
+          persist-credentials: true
 
       - name: 安裝 Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: 檢查股票資料
+      - name: 更新台股資料
         run: python update.py
+
+      - name: 儲存更新結果
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if ! git diff --cached --quiet; then
+            git commit -m "V2 自動更新台股資料"
+            git push origin HEAD:radar-v2-test
+          else
+            echo "沒有需要提交的資料變更"
+          fi
