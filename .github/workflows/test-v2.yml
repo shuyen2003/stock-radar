@@ -1,0 +1,22 @@
+name: 台股飆股雷達 V2 資料測試
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 取得測試分支程式
+        uses: actions/checkout@v4
+
+      - name: 安裝 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 檢查股票資料
+        run: python update_v2.py
