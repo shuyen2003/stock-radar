@@ -1,41 +1,308 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>台股飆股雷達</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>台股飆股雷達 V2</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f3f6fa;color:#17263a;font-family:-apple-system,BlinkMacSystemFont,sans-serif}header{background:#12345a;color:white;padding:24px 18px}h1{margin:0;font-size:27px}header p{margin:8px 0 0;color:#d6e6f4}main{padding:16px;max-width:760px;margin:auto}.panel{background:white;padding:18px;margin-bottom:15px;border-radius:15px;box-shadow:0 2px 8px #0001}h2{font-size:19px;margin:0 0 16px}.field{margin:14px 0}label{display:block;font-weight:600;margin-bottom:7px}input[type=number],select{width:100%;padding:11px;border:1px solid #bdcad9;border-radius:9px;font-size:16px}input[type=checkbox]{width:18px;height:18px;vertical-align:middle;margin-right:8px}.check{font-weight:400;padding:5px 0}button{background:#1267bd;color:white;border:0;padding:13px;border-radius:10px;font-size:16px;font-weight:700;width:100%;margin-top:12px}.note{color:#657386;font-size:13px;line-height:1.6}.status{padding:13px;background:#edf4fb;border-radius:9px;line-height:1.6}table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:10px 5px;border-bottom:1px solid #e4e9ef;text-align:left}th{background:#f2f6fa}.pill{background:#dfeefa;color:#16538b;border-radius:7px;padding:4px}.empty{padding:22px 0;color:#6b7888;text-align:center}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#f3f6fb;
+  color:#172b4d;
+  font-family:-apple-system,BlinkMacSystemFont,
+  "Noto Sans TC",sans-serif;
+}
+header{
+  background:#173c76;
+  color:white;
+  padding:24px 18px;
+  text-align:center;
+}
+header h1{margin:0 0 8px;font-size:26px}
+header p{margin:0;color:#dce8ff}
+main{max-width:950px;margin:auto;padding:16px}
+.panel{
+  background:white;
+  padding:20px;
+  border-radius:14px;
+  margin-bottom:16px;
+  box-shadow:0 2px 10px #152c5010;
+}
+h2{font-size:19px;margin:0 0 15px}
+.status{
+  background:#edf4ff;
+  border-radius:10px;
+  padding:14px;
+  line-height:1.8;
+}
+.muted{color:#63748b}
+.progress{
+  height:12px;
+  background:#e4eaf2;
+  border-radius:10px;
+  overflow:hidden;
+  margin:12px 0;
+}
+.progress div{
+  height:100%;
+  background:#2876d9;
+  width:0;
+}
+.field{margin:12px 0}
+input{
+  width:110px;
+  padding:10px;
+  border:1px solid #b8c6d8;
+  border-radius:8px;
+  font-size:16px;
+}
+button{
+  background:#1765be;
+  color:white;
+  border:0;
+  padding:12px 18px;
+  border-radius:9px;
+  font-size:16px;
+  cursor:pointer;
+}
+.table-wrap{overflow-x:auto}
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:650px;
+}
+th,td{
+  padding:12px 9px;
+  text-align:left;
+  border-bottom:1px solid #e6ebf1;
+}
+th{background:#eef4fb}
+.empty{
+  text-align:center;
+  padding:28px 12px;
+  color:#63748b;
+  line-height:1.8;
+}
+.note{line-height:1.8;color:#53657c}
+footer{
+  text-align:center;
+  color:#77869b;
+  padding:20px;
+  font-size:13px;
+}
 </style>
 </head>
 <body>
-<header><h1>📈 台股飆股雷達</h1><p>上市＋上櫃｜起漲候選股智慧篩選</p></header>
+<header>
+<h1>📈 台股飆股雷達 V2</h1>
+<p>上市股票｜成交量放大｜20日突破｜均線趨勢</p>
+</header>
+
 <main>
-<section class="panel"><h2>📅 股市資料狀態</h2><div id="status" class="status">尚未接上每日自動更新資料</div><p class="note">只使用已發布的真實資料；沒有資料時不產生假排名。GitHub Pages 本身不會自動抓取股票行情。</p></section>
-<section class="panel"><h2>⚙️ 自訂選股條件</h2>
-<div class="field"><label>成交量放大倍數</label><input id="volume" type="number" min="1" max="20" step="0.1" value="1.8"></div>
-<div class="field"><label>突破整理區間天數</label><select id="days"><option value="10">10 日</option><option value="20" selected>20 日</option><option value="60">60 日</option></select></div>
-<div class="field"><label>營收年增率最低（%）</label><input id="yoy" type="number" value="20"></div>
-<div class="field"><label>營收月增率最低（%）</label><input id="mom" type="number" value="0"></div>
-<div class="field"><label>三大法人連續買超天數</label><input id="inst" type="number" min="0" max="30" value="3"></div>
-<div class="field"><label>最低綜合評分</label><input id="score" type="number" min="0" max="100" value="70"></div>
-<label class="check"><input id="breakout" type="checkbox" checked>突破整理區間</label>
-<label class="check"><input id="near" type="checkbox" checked>接近起漲點</label>
-<label class="check"><input id="margin" type="checkbox">融資餘額未急增</label>
-<button onclick="screenStocks()">🔎 開始篩選</button>
-<button onclick="saveOptions()" style="background:#516982">儲存選股條件</button>
+<section class="panel">
+<h2>📅 股市資料狀態</h2>
+<div id="status" class="status">正在讀取資料...</div>
+<div class="progress">
+<div id="progress"></div>
+</div>
+<div id="progressText" class="muted"></div>
 </section>
-<section class="panel"><h2>🏆 飆股候選名單（最多20檔）</h2><div id="results" class="empty">等待載入真實股票資料</div></section>
-<section class="panel"><h2>🔔 候選股警示</h2><div id="alerts" class="note">尚無可確認的候選警示；此版本不會發送背景推播。</div></section>
-<section class="panel"><h2>🇺🇸 美股 AI／半導體觀察</h2><p>NVDA、AMD、AVGO、MU、TSM、LRCX、AMAT</p><p class="note">目前僅提供觀察清單，尚未連接美股市場資料。</p></section>
+
+<section class="panel">
+<h2>⚙️ 技術面篩選條件</h2>
+<div class="field">
+<label for="volume">
+最低成交量放大倍數：
+</label>
+<input id="volume" type="number"
+ min="1" max="20" step="0.1" value="1.8">
+</div>
+<p class="note">
+程式預先篩選：突破前20個交易日收盤價高點、
+收盤價高於5日均線，且5日均線高於前20日平均收盤價。
+這裡只能進一步提高成交量條件。
+</p>
+<button onclick="screenStocks()">🔍 開始篩選</button>
+</section>
+
+<section class="panel">
+<h2>🏆 飆股候選名單（最多20檔）</h2>
+<div id="results" class="empty">
+正在讀取候選股票...
+</div>
+</section>
+
+<section class="panel">
+<h2>📊 功能開發狀態</h2>
+<p class="note">
+✅ 上市股票歷史行情累積<br>
+✅ 成交量放大分析<br>
+✅ 20日股價突破分析<br>
+✅ 均線趨勢分析<br>
+⏳ 上櫃股票技術面選股尚未啟用<br>
+⏳ 營收、三大法人及融資資料尚未接入<br>
+⏳ 綜合評分及進階警示尚未完成
+</p>
+</section>
+
+<section class="panel">
+<h2>🔔 風險提醒</h2>
+<p class="note">
+本系統使用公開市場資料進行技術面初步篩選，
+不代表股票未來一定上漲，也不是買賣建議。
+資料尚未累積完整或沒有符合條件的股票時，
+不會產生虛構候選名單。
+</p>
+</section>
 </main>
+
+<footer>台股飆股雷達 V2｜技術面測試版本</footer>
+
 <script>
-const keys=['volume','days','yoy','mom','inst','score','breakout','near','margin'];
-try{let saved=JSON.parse(localStorage.getItem('radar_options')||'{}');for(let k of keys)if(saved[k]!==undefined){let e=document.getElementById(k);if(e.type==='checkbox')e.checked=saved[k];else e.value=saved[k]}}catch(e){}
-function saveOptions(){let v={};keys.forEach(k=>{let e=document.getElementById(k);v[k]=e.type==='checkbox'?e.checked:e.value});localStorage.setItem('radar_options',JSON.stringify(v));alert('選股條件已儲存在這台手機的瀏覽器')}
 let stocks=[];
-async function loadData(){try{let response=await fetch('./data/stocks.json?v='+Date.now());if(!response.ok)throw Error('尚無資料檔');let d=await response.json();if(!Array.isArray(d.stocks)||!d.date)throw Error('資料格式不正確');stocks=d.stocks;document.getElementById('status').textContent='資料日期：'+d.date+'｜股票筆數：'+stocks.length+'｜請確認各欄位資料完整度';screenStocks()}catch(e){document.getElementById('status').textContent='尚未連接自動更新資料（'+e.message+'）';document.getElementById('results').textContent='目前沒有可供篩選的真實股票資料'}}
-function screenStocks(){let n=k=>Number(document.getElementById(k).value),c=k=>document.getElementById(k).checked;let need=['code','name','volume_ratio','revenue_yoy','revenue_mom','institution_days','score','breakout_days','near_start','margin_ok'];let rows=stocks.filter(s=>need.every(k=>s[k]!==undefined&&s[k]!==null&&s[k]!=='')&&Number(s.volume_ratio)>=n('volume')&&Number(s.revenue_yoy)>=n('yoy')&&Number(s.revenue_mom)>=n('mom')&&Number(s.institution_days)>=n('inst')&&Number(s.score)>=n('score')&&(!c('breakout')||Number(s.breakout_days)>=n('days'))&&(!c('near')||s.near_start===true)&&(!c('margin')||s.margin_ok===true)).sort((a,b)=>Number(b.score)-Number(a.score)).slice(0,20);let el=document.getElementById('results');if(!rows.length){el.innerHTML='<div class="empty">沒有符合條件的股票，或尚未取得完整資料</div>';document.getElementById('alerts').textContent='尚無符合條件的警示';return}el.innerHTML='<table><thead><tr><th>代碼／名稱</th><th>量比</th><th>營收年增</th><th>分數</th></tr></thead><tbody>'+rows.map(s=>'<tr><td>'+String(s.code).replace(/[&<>"]/g,'')+'<br>'+String(s.name).replace(/[&<>"]/g,'')+'</td><td>'+Number(s.volume_ratio).toFixed(1)+'</td><td>'+Number(s.revenue_yoy).toFixed(1)+'%</td><td><span class="pill">'+Number(s.score)+'</span></td></tr>').join('')+'</tbody></table>';document.getElementById('alerts').textContent='目前符合條件：'+rows.length+' 檔（僅頁面內提示，非即時推播）'}
+let historyDays=0;
+let dataStatus='';
+
+function setMessage(message){
+  document.getElementById('results').innerHTML='';
+  document.getElementById('results').textContent=message;
+  document.getElementById('results').className='empty';
+}
+
+function cell(row,value){
+  const td=document.createElement('td');
+  td.textContent=String(value);
+  row.appendChild(td);
+}
+
+async function loadData(){
+  try{
+    const response=await fetch(
+      './data/stocks.json?v='+Date.now(),
+      {cache:'no-store'}
+    );
+
+    if(!response.ok){
+      throw new Error('無法讀取股票資料');
+    }
+
+    const data=await response.json();
+
+    if(
+      !data ||
+      !Array.isArray(data.stocks) ||
+      !data.date
+    ){
+      throw new Error('股票資料格式不正確');
+    }
+
+    stocks=data.stocks;
+    historyDays=Number(data.history_days)||0;
+    dataStatus=data.status||'';
+
+    document.getElementById('status').textContent=
+      '資料日期：'+data.date+
+      '｜歷史交易日：'+historyDays+
+      '｜候選股票：'+stocks.length+
+      '檔｜'+dataStatus;
+
+    const percent=Math.min(
+      100,Math.max(0,historyDays/21*100)
+    );
+
+    document.getElementById('progress').style.width=
+      percent+'%';
+
+    document.getElementById('progressText').textContent=
+      historyDays>=21
+      ?'已達21個交易日的基本分析門檻'
+      :'尚需累積約'+(21-historyDays)+
+       '個不同交易日';
+
+    screenStocks();
+
+  }catch(error){
+    document.getElementById('status').textContent=
+      '資料讀取失敗：'+error.message;
+
+    setMessage(
+      '目前無法取得股票資料，請檢查每日更新狀態。'
+    );
+  }
+}
+
+function screenStocks(){
+  if(historyDays<21){
+    setMessage(
+      '歷史資料累積中，目前有'+historyDays+
+      '個交易日。至少需要21個交易日才會開始選股。'
+    );
+    return;
+  }
+
+  const minimum=Number(
+    document.getElementById('volume').value
+  );
+
+  if(!Number.isFinite(minimum)||minimum<1){
+    setMessage('請輸入正確的成交量放大倍數。');
+    return;
+  }
+
+  const selected=stocks.filter(stock=>
+    Number.isFinite(Number(stock.volume_ratio)) &&
+    Number(stock.volume_ratio)>=minimum
+  );
+
+  if(selected.length===0){
+    setMessage('目前沒有符合技術面條件的股票。');
+    return;
+  }
+
+  const wrap=document.createElement('div');
+  wrap.className='table-wrap';
+
+  const table=document.createElement('table');
+  const thead=document.createElement('thead');
+  const headerRow=document.createElement('tr');
+
+  [
+    '代號','股票名稱','收盤價',
+    '量比','突破天數','5日均線','20日參考均線'
+  ].forEach(name=>{
+    const th=document.createElement('th');
+    th.textContent=name;
+    headerRow.appendChild(th);
+  });
+
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  const tbody=document.createElement('tbody');
+
+  selected.slice(0,20).forEach(stock=>{
+    const tr=document.createElement('tr');
+    cell(tr,stock.code??'-');
+    cell(tr,stock.name??'-');
+    cell(tr,stock.close??'-');
+    cell(tr,stock.volume_ratio??'-');
+    cell(tr,stock.breakout_days??'-');
+    cell(tr,stock.sma5??'-');
+    cell(tr,stock.sma20??'-');
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+
+  const results=document.getElementById('results');
+  results.innerHTML='';
+  results.className='';
+  results.appendChild(wrap);
+}
+
 loadData();
 </script>
 </body>
