@@ -22,4 +22,4 @@ jobs:
           python-version: '3.11'
 
       - name: 檢查股票資料
-        run: python update_v2.py
+        run: python update.py
