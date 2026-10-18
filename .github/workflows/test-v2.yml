@@ -4,7 +4,7 @@ name: 台股飆股雷達 V2 每日更新測試
 on:
   workflow_dispatch:
   schedule:
-    - cron: '30 6 * * 1-5'
+    - cron: '30 8 * * 1-5'
   push:
     branches:
       - radar-v2-test
