@@ -27,7 +27,7 @@ jobs:
       - name: 取得測試分支程式
         uses: actions/checkout@v4
         with:
-          ref: radar-v2-test
+          ref: main
           persist-credentials: true
 
       - name: 安裝 Python
