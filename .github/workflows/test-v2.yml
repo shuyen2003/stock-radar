@@ -1,30 +1,23 @@
-
-name: 台股飆股雷達 V2 每日更新測試
+name: 台股飆股雷達 V2 每日更新
 
 on:
   workflow_dispatch:
   schedule:
+    # UTC 08:30 = 台灣時間 16:30，週一至週五
     - cron: '30 8 * * 1-5'
-  push:
-    branches:
-      - radar-v2-test
-    paths:
-      - '.github/workflows/test-v2.yml'
-      - 'update.py'
 
 permissions:
   contents: write
 
 concurrency:
-  group: radar-v2-test-update
+  group: stock-radar-main-update
   cancel-in-progress: false
 
 jobs:
   update:
     runs-on: ubuntu-latest
-
     steps:
-      - name: 取得測試分支程式
+      - name: 取得正式分支程式
         uses: actions/checkout@v4
         with:
           ref: main
@@ -39,13 +32,26 @@ jobs:
         run: python update.py
 
       - name: 儲存更新結果
+        shell: bash
         run: |
+          set -e
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/
-          if ! git diff --cached --quiet; then
-            git commit -m "V2 自動更新台股資料"
-            git push origin HEAD:radar-v2-test
-          else
+          if git diff --cached --quiet; then
             echo "沒有需要提交的資料變更"
+            exit 0
           fi
+          git commit -m "自動更新台股資料"
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              echo "已成功儲存至 main"
+              exit 0
+            fi
+            echo "遠端有新提交，稍後重試（第 ${attempt} 次）"
+            sleep 3
+          done
+          echo "推送失敗：請檢查是否有其他工作流程同時更新資料"
+          exit 1
